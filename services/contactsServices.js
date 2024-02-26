@@ -1,6 +1,7 @@
 const fs = require("fs/promises");
 const path = require("path");
 const { nanoid } = require("nanoid");
+const Joi = require('joi');
 
 const contactsPath = path.join(__dirname, "../", "db/contacts.json");
 
@@ -42,6 +43,15 @@ const updateContact = async ({ id, name, email, phone }) => {
   const contacts = await listContacts();
   const index = contacts.findIndex((contact) => contact.id === id);
   if (index === -1) return null;
+  const schema = Joi.object({
+    name: Joi.string(),
+    email: Joi.string().email(),
+    phone: Joi.string(),
+  }).min(1).message('Body must have at least one field');
+  const validationResult = schema.validate({ name, email, phone });
+  if (validationResult.error) {
+    throw new Error(validationResult.error.message);
+  }
   contacts[index] = { id, name, email, phone };
   await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
   return contacts[index];
