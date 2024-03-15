@@ -1,4 +1,4 @@
-const Joi = require('joi');
+const Joi = require("joi");
 
 const createContactSchema = Joi.object({
   name: Joi.string().required(),
@@ -10,14 +10,21 @@ const updateContactSchema = Joi.object({
   name: Joi.string(),
   email: Joi.string(),
   phone: Joi.string(),
-}).min(1).message('Body must have at least one field');
+})
+  .min(1)
+  .message("Body must have at least one field");
 
 const updatefavoriteSchema = Joi.object({
-    favorite:Joi.boolean().required(),
+  favorite: Joi.boolean().required(),
+});
+const userSchema = Joi.object({
+  email: Joi.string().required(),
+  password: Joi.string().required(),
 });
 
 module.exports = {
-    createContactSchema,
-    updateContactSchema,
-    updatefavoriteSchema,
+  createContactSchema,
+  updateContactSchema,
+  updatefavoriteSchema,
+  userSchema,
 };
