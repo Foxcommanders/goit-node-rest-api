@@ -1,26 +1,48 @@
-import express from "express";
-import morgan from "morgan";
-import cors from "cors";
+const express = require("express");
+const morgan = require("morgan");
+const cors = require("cors");
+const mongoose = require("mongoose");
+const dotenv = require("dotenv").config();
+const path = require('path')
+const { DB_HOST } = process.env;
 
-import contactsRouter from "./routes/contactsRouter.js";
-
+const contactsRouter = require("./routes/contactsRouter");
+const authRouter = require("./routes/auth");
 const app = express();
+const usersRouter = require("./routes/usersRouter");
 
+
+
+app.use(express.json());
 app.use(morgan("tiny"));
 app.use(cors());
-app.use(express.json());
 
+
+app.use(express.static(path.join(__dirname, 'public')));
 app.use("/api/contacts", contactsRouter);
+app.use("/users", authRouter);
+app.use("/users", usersRouter);
+app.use("/avatars",authRouter)
 
 app.use((_, res) => {
   res.status(404).json({ message: "Route not found" });
 });
 
 app.use((err, req, res, next) => {
-  const { status = 500, message = "Server error" } = err;
+  const { status = 500, message = "Server error", name } = err;
+
   res.status(status).json({ message });
 });
 
-app.listen(3000, () => {
-  console.log("Server is running. Use our API on port: 3000");
-});
+mongoose
+  .connect(DB_HOST)
+  .then(() => console.log("Database connection successful"))
+  .then(() => {
+    app.listen(3000, () => {
+      console.log("Server is running. Use our API on port: 3000");
+    });
+  })
+  .catch((err) => {
+    console.error(err.message);
+    process.exit(1);
+  });
